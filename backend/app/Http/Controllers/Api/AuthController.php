@@ -80,4 +80,22 @@ class AuthController extends Controller
             'data' => $user
         ]);
     }
+
+    public function logout(Request $request) {
+    $user = $request->user();
+
+    if ($user) {
+        $user->currentAccessToken()->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berhasil logout'
+        ]);
+    }
+
+    return response()->json([
+        'status' => 'error',
+        'message' => 'User tidak ditemukan atau sesi telah berakhir.'
+    ], 401);
+}
 }
