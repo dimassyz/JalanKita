@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-{
-    Schema::create('users', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->string('username')->unique();
-        $table->string('nik', 16)->unique();
-        $table->string('email')->unique();
-        $table->text('alamat_lengkap');
-        $table->string('password');
-        $table->enum('role', ['user', 'admin'])->default('user');
-        $table->string('profile_picture')->nullable();
-        $table->rememberToken();
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('reports', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('title');
+            $table->text('description');
+            $table->string('image_path');
+            $table->enum('status', ['pending', 'diproses', 'selesai', 'ditolak'])->default('pending');
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->timestamps();
+
+            // Indexing status untuk fitur filter P2
+            $table->index('status');
+        });
+    }
 
     /**
      * Reverse the migrations.
