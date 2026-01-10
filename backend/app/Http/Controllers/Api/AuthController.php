@@ -18,6 +18,7 @@ class AuthController extends Controller
             'nik' => 'required|string|size:16|unique:users',
             'email' => 'required|string|email|unique:users',
             'alamat_lengkap' => 'required|string',
+            'phone_number' => 'required|string|max:15',
             'password' => 'required|string|min:8',
         ]);
 
@@ -35,6 +36,7 @@ class AuthController extends Controller
             'nik' => $request->nik,
             'email' => $request->email,
             'alamat_lengkap' => $request->alamat_lengkap,
+            'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'role' => 'user',
         ]);
