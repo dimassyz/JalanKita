@@ -15,4 +15,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'showUser']);
     Route::post('/user/update', [UserController::class, 'updateUser']);
     Route::post('/reports', [ReportController::class, 'store']);
+    Route::get('/my-reports', [ReportController::class, 'myReports']);
 });

@@ -44,4 +44,17 @@ class ReportController extends Controller
             'data'    => $report
         ], 201);
     }
+
+    public function myReports(Request $request)
+    {
+        $reports = Report::where('user_id', auth()->id())
+            ->latest()
+            ->get();
+    
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Daftar riwayat laporan berhasil diambil',
+            'data' => $reports
+        ]);
+    }
 }
