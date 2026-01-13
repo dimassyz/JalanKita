@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Report;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -56,5 +57,13 @@ class ReportController extends Controller
             'message' => 'Daftar riwayat laporan berhasil diambil',
             'data' => $reports
         ]);
+    }
+
+    public function exportPDF($id) {
+    $report = Report::with('user')->where('user_id', auth()->id())->findOrFail($id);
+
+    $pdf = Pdf::loadView('report_pdf', compact('report'));
+
+    return $pdf->download('Bukti_Lapor_'.$id.'.pdf');
     }
 }
