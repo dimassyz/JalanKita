@@ -16,4 +16,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/update', [UserController::class, 'updateUser']);
     Route::post('/reports', [ReportController::class, 'store']);
     Route::get('/my-reports', [ReportController::class, 'myReports']);
+    Route::get('/reports/{id}/export', [ReportController::class, 'exportPDF']);
 });
