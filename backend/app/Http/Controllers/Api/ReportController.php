@@ -66,4 +66,33 @@ class ReportController extends Controller
 
     return $pdf->download('Bukti_Lapor_'.$id.'.pdf');
     }
+
+    public function getAllReport() {
+    $reports = Report::with('user')->latest()->get(); 
+    
+        return response()->json([
+        'status' => 'success',
+        'data' => $reports
+        ]);
+    }
+
+    public function updateStatus(Request $request, $id) {
+    $validator = Validator::make($request->all(), [
+        'status' => 'required|in:pending,diproses,selesai,ditolak',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
+    }
+
+    $report = Report::findOrFail($id);
+    $report->status = $request->status;
+    $report->save();
+
+        return response()->json([
+        'status' => 'success',
+        'message' => 'Status laporan berhasil diperbarui menjadi ' . $request->status,
+        'data' => $report
+    ]);
+    }
 }
