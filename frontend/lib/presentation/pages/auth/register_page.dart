@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/data/service/http_service.dart';
+import 'package:frontend/data/repository/auth_repository.dart';
+import 'package:frontend/data/usecase/request/register_request.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,8 +12,92 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _nikController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   bool _isObscure = true;
   bool _isObscureConfirm = true;
+  bool _isLoading = false;
+
+  final AuthRepository _authRepository = AuthRepository(HttpService());
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _usernameController.dispose();
+    _nikController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _handleRegister() async {
+    // Cek password valid?
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Kata sandi tidak cocok")));
+      return;
+    }
+
+    // Cek semua field terisi
+    if (_nameController.text.isEmpty ||
+        _usernameController.text.isEmpty ||
+        _nikController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _addressController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Semua field harus diisi")));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final request = RegisterRequest(
+        name: _nameController.text,
+        username: _usernameController.text,
+        nik: _nikController.text,
+        email: _emailController.text,
+        alamatLengkap: _addressController.text,
+        phoneNumber: _phoneController.text,
+        password: _passwordController.text,
+      );
+
+      final response = await _authRepository.register(request);
+
+      setState(() => _isLoading = false);
+
+      if (response.status == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message ?? "Registrasi berhasil")),
+        );
+        Navigator.pop(context); // Kembali ke Login
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message ?? "Terjadi kesalahan")),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal terhubung ke server: $e")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +133,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Nama Lengkap
               TextFormField(
+                controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Nama Lengkap',
                   prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
@@ -55,6 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Username
               TextFormField(
+                controller: _usernameController,
                 decoration: const InputDecoration(
                   labelText: 'Username',
                   prefixIcon: Icon(Icons.alternate_email, color: Colors.grey),
@@ -64,6 +153,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // NIK
               TextFormField(
+                controller: _nikController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'NIK',
@@ -74,6 +164,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Nomor HP
               TextFormField(
+                controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'Nomor Telepon',
@@ -84,6 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Email
               TextFormField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Email',
@@ -94,6 +186,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Alamat Lengkap
               TextFormField(
+                controller: _addressController,
                 maxLines: 3,
                 decoration: const InputDecoration(
                   labelText: 'Alamat Lengkap',
@@ -108,6 +201,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Password
               TextFormField(
+                controller: _passwordController,
                 obscureText: _isObscure,
                 decoration: InputDecoration(
                   labelText: 'Kata Sandi',
@@ -132,6 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Konfirmasi Password
               TextFormField(
+                controller: _confirmPasswordController,
                 obscureText: _isObscureConfirm,
                 decoration: InputDecoration(
                   labelText: 'Konfirmasi Kata Sandi',
@@ -155,10 +250,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Register Button
               ElevatedButton(
-                onPressed: () {
-                  // Logika Register nanti di sini
-                },
-                child: const Text("DAFTAR"),
+                onPressed: _isLoading ? null : _handleRegister,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text("DAFTAR"),
               ),
 
               const SizedBox(height: 24),
