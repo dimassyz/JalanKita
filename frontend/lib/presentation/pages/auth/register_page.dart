@@ -41,15 +41,13 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _handleRegister() async {
-    // Cek password valid?
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Kata sandi tidak cocok")));
-      return;
-    }
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
 
+  void _handleRegister() async {
     // Cek semua field terisi
     if (_nameController.text.isEmpty ||
         _usernameController.text.isEmpty ||
@@ -58,9 +56,28 @@ class _RegisterPageState extends State<RegisterPage> {
         _emailController.text.isEmpty ||
         _addressController.text.isEmpty ||
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Semua field harus diisi")));
+      _showSnackBar("Semua field harus diisi");
+      return;
+    }
+
+    // Cek password valid?
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showSnackBar("Kata sandi tidak cocok");
+      return;
+    }
+
+    if (_nikController.text.length != 16) {
+      _showSnackBar("NIK harus berjumlah 16 digit");
+      return;
+    }
+
+    if (!_emailController.text.contains("@")) {
+      _showSnackBar("Format email tidak valid");
+      return;
+    }
+
+    if (_passwordController.text.length < 8) {
+      _showSnackBar("Kata sandi minimal 8 karakter");
       return;
     }
 
@@ -82,20 +99,14 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() => _isLoading = false);
 
       if (response.status == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? "Registrasi berhasil")),
-        );
+        _showSnackBar(response.message ?? "Registrasi berhasil");
         Navigator.pop(context); // Kembali ke Login
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.message ?? "Terjadi kesalahan")),
-        );
+        _showSnackBar(response.message ?? "Terjadi kesalahan");
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Gagal terhubung ke server: $e")));
+      _showSnackBar("Gagal terhubung ke server: $e");
     }
   }
 
