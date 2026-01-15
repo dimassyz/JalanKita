@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:frontend/presentation/pages/auth/login_page.dart';
+import 'package:frontend/presentation/pages/report/create_report_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       // theme: ThemeData(
       //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       // ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const LoginPage(),
     );
   }
 }
@@ -47,8 +48,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // List Halaman yang akan ditampilkan
   final List<Widget> _pages = [
     const CreateReportPage(), // Index 0
-    const HistoryPage(),      // Index 1
-    const ProfilePage(),      // Index 2
+    // const HistoryPage(),      // Index 1
+    // const ProfilePage(),      // Index 2
   ];
 
   void _onItemTapped(int index) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/presentation/pages/auth/register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -91,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
+                      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Home Page',)),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Tombol Masuk Ditekan")),
