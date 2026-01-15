@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// Panggil class ini di main.dart -> MaterialApp(theme: JalanKitaTheme.darkTheme)
-
 class JalanKitaTheme {
-  // Definisi Warna Utama
   static const Color primaryColor = Color(0xFFFFC107); // Amber
   static const Color backgroundColor = Color(0xFF121212); // Hitam Pekat
   static const Color surfaceColor = Color(0xFF1E1E1E); // Abu Gelap (Card)
   static const Color errorColor = Color(0xFFEF5350); // Merah
   static const Color inputColor = Color(0xFF2C2C2C); // Abu (Input)
+
+  // Warna Status Laporan
+  static const Color statusPending = Color(0xFF757575); // Abu-abu
+  static const Color statusProcess = Color(0xFF2196F3); // Biru
+  static const Color statusDone = Color(0xFF4CAF50);    // Hijau
+  static const Color statusRejected = Color(0xFFF44336); // Merah
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -44,11 +47,11 @@ class JalanKitaTheme {
         bodyMedium: GoogleFonts.inter(fontSize: 14, color: Colors.white60),
       ),
 
-      // Mengatur Style Tombol (ElevatedButton)
+      // Style Tombol (ElevatedButton)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.black, // Teks tombol jadi hitam biar kontras
+          foregroundColor: Colors.black, // Teks tombol jadi hitam agar kontras
           elevation: 0,
           textStyle: const TextStyle(
             fontSize: 16,
@@ -60,7 +63,7 @@ class JalanKitaTheme {
         ),
       ),
 
-      // Mengatur Style Input Form (TextField)
+      // Style Input Form (TextField)
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: inputColor, 
@@ -82,7 +85,7 @@ class JalanKitaTheme {
         hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
       ),
 
-      // Mengatur Style Card
+      // Style Card
       cardTheme: CardThemeData(
         color: surfaceColor,
         elevation: 4,
