@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:frontend/presentation/pages/auth/login_page.dart';
+import 'package:frontend/presentation/pages/profile/profile_page.dart';
 import 'package:frontend/presentation/pages/report/create_report_page.dart';
 import 'package:frontend/presentation/pages/report/history_report_page.dart';
 
@@ -50,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _pages = [
     const CreateReportPage(), // Index 0
     const HistoryPage(),      // Index 1
-    // const ProfilePage(),      // Index 2
+    const ProfilePage(),      // Index 2
   ];
 
   void _onItemTapped(int index) {
