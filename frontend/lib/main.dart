@@ -42,21 +42,49 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // int _counter = 0;
+ int _selectedIndex = 0; // Default: 0 (Halaman Form)
 
-  // void _incrementCounter() {
-  //   setState(() {
-  //     _counter++;
-  //   });
-  // }
+  // List Halaman yang akan ditampilkan
+  final List<Widget> _pages = [
+    const CreateReportPage(), // Index 0
+    const HistoryPage(),      // Index 1
+    const ProfilePage(),      // Index 2
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'JalanKita Auth',
-      theme: JalanKitaTheme.darkTheme, // Menggunakan tema gelap
-      home: const LoginPage(),
+    return Scaffold(
+      // Body berubah sesuai index yang dipilih
+      body: _pages[_selectedIndex],
+      
+      // Footer Bar (Bottom Navigation)
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_a_photo_outlined),
+            activeIcon: Icon(Icons.add_a_photo),
+            label: 'Lapor',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: 'Riwayat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
+      ),
     );
   }
 }
