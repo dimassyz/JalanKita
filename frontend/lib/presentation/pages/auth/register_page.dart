@@ -32,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const Text(
                 "Buat Akun",
                 style: TextStyle(
-                  fontSize: 28, 
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -40,10 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 8),
               Text(
                 "Bergabung bersama kami untuk infrastruktur yang lebih baik.",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
               ),
               const SizedBox(height: 32),
 
@@ -52,6 +49,25 @@ class _RegisterPageState extends State<RegisterPage> {
                 decoration: const InputDecoration(
                   labelText: 'Nama Lengkap',
                   prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Username
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: Icon(Icons.alternate_email, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // NIK
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'NIK',
+                  prefixIcon: Icon(Icons.badge_outlined, color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 16),
@@ -76,12 +92,29 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 16),
 
+              // Alamat Lengkap
+              TextFormField(
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Alamat Lengkap',
+                  prefixIcon: Icon(
+                    Icons.location_on_outlined,
+                    color: Colors.grey,
+                  ),
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Password
               TextFormField(
                 obscureText: _isObscure,
                 decoration: InputDecoration(
                   labelText: 'Kata Sandi',
-                  prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: Colors.grey,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isObscure ? Icons.visibility_off : Icons.visibility,
@@ -105,7 +138,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isObscureConfirm ? Icons.visibility_off : Icons.visibility,
+                      _isObscureConfirm
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -125,7 +160,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
                 child: const Text("DAFTAR"),
               ),
-              
+
               const SizedBox(height: 24),
 
               // Login Link
