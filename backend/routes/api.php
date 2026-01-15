@@ -17,4 +17,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reports', [ReportController::class, 'store']);
     Route::get('/my-reports', [ReportController::class, 'myReports']);
     Route::get('/reports/{id}/export', [ReportController::class, 'exportPDF']);
+
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/reports', [ReportController::class, 'getAllReport']);
+        Route::patch('/admin/reports/{id}/status', [ReportController::class, 'updateStatus']);
+    });
 });
