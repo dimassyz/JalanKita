@@ -84,7 +84,7 @@ class ReportCard extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            // 1. Gambar Thumbnail (Placeholder)
+            // Gambar Thumbnail
             Container(
               width: 80,
               height: 80,
@@ -96,7 +96,7 @@ class ReportCard extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             
-            // 2. Info Text
+            // Info Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +138,7 @@ class ReportCard extends StatelessWidget {
               ),
             ),
             
-            // 3. Arrow Icon
+            // Arrow Icon
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),

@@ -21,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
 
   void _handleLogin() async {
-    // input email password kosong?
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Email dan Kata Sandi wajib diisi")),
@@ -83,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 1. Logo
+                // Logo
                 Image(image: AssetImage('assets/images/logo.png'), height: 100),
                 const SizedBox(height: 16),
                 const Text(
@@ -104,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 48),
 
-                // 2. Form Section
+                // Form Section
                 const Text(
                   "Masuk",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -165,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 24),
 
-                // 3. Register Link
+                // Register Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -12,7 +12,7 @@ class EditProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            // Avatar dengan Icon Kamera (Edit Foto)
+            // Avatar dengan Icon Kamera
             Center(
               child: Stack(
                 children: [
@@ -34,7 +34,7 @@ class EditProfilePage extends StatelessWidget {
                     right: 0,
                     child: InkWell(
                       onTap: () {
-                        // TODO: Logic Upload Foto (Tugas Mobile Student B)
+                        // TODO: Logic Upload Foto
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Buka Galeri...")),
                         );

@@ -48,7 +48,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _handleRegister() async {
-    // Cek semua field terisi
     if (_nameController.text.isEmpty ||
         _usernameController.text.isEmpty ||
         _nikController.text.isEmpty ||
@@ -60,7 +59,6 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Cek password valid?
     if (_passwordController.text != _confirmPasswordController.text) {
       _showSnackBar("Kata sandi tidak cocok");
       return;

@@ -21,7 +21,7 @@ class ProfilePage extends StatelessWidget {
             ),
             tooltip: "Keluar",
             onPressed: () {
-              // Navigasi Balik ke Login & Hapus semua history navigasi
+              // Balik ke Login
               Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const LoginPage()),
                 (route) => false,
@@ -34,7 +34,7 @@ class ProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            // 1. Foto Profil & Nama
+            // Foto Profil & Nama
             Center(
               child: Column(
                 children: [
@@ -66,7 +66,7 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // 2. Info Detail (Menggunakan Widget Terpisah)
+            // Info Detail
             const ProfileInfoItem(
               icon: Icons.person_outline,
               title: "Nama Lengkap",
@@ -99,7 +99,7 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 3. Tombol Edit
+            // Tombol Edit
             SizedBox(
               width: double.infinity,
               height: 50,
