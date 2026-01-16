@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:frontend/presentation/pages/auth/login_page.dart';
+import 'package:frontend/presentation/pages/profile/edit_profile_page.dart';
 import 'package:frontend/presentation/widgets/profile_item_card.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -14,7 +15,10 @@ class ProfilePage extends StatelessWidget {
         actions: [
           // Tombol Logout
           IconButton(
-            icon: const Icon(Icons.logout, color: JalanKitaTheme.statusRejected),
+            icon: const Icon(
+              Icons.logout,
+              color: JalanKitaTheme.statusRejected,
+            ),
             tooltip: "Keluar",
             onPressed: () {
               // Navigasi Balik ke Login & Hapus semua history navigasi
@@ -23,7 +27,7 @@ class ProfilePage extends StatelessWidget {
                 (route) => false,
               );
             },
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -40,41 +44,60 @@ class ProfilePage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.grey[800],
                       shape: BoxShape.circle,
-                      border: Border.all(color: JalanKitaTheme.primaryColor, width: 2),
+                      border: Border.all(
+                        color: JalanKitaTheme.primaryColor,
+                        width: 2,
+                      ),
                     ),
-                    child: const Icon(Icons.person, size: 60, color: Colors.white54),
+                    child: const Icon(
+                      Icons.person,
+                      size: 60,
+                      color: Colors.white54,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "User Mahasiswa",
+                    "Halo, Username Mahasiswa",
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
 
             // 2. Info Detail (Menggunakan Widget Terpisah)
             const ProfileInfoItem(
-              icon: Icons.person_outline, 
-              title: "Nama Lengkap", 
-              value: "User Mahasiswa"
+              icon: Icons.person_outline,
+              title: "Nama Lengkap",
+              value: "Nama Mahasiswa",
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             const ProfileInfoItem(
-              icon: Icons.phone_android, 
-              title: "Nomor Telepon", 
-              value: "0812-3456-7890"
+              icon: Icons.phone_android,
+              title: "Nomor Telepon",
+              value: "0812-3456-7890",
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             const ProfileInfoItem(
-              icon: Icons.email_outlined, 
-              title: "Email", 
-              value: "mahasiswa@jalankita.com"
+              icon: Icons.email_outlined,
+              title: "Email",
+              value: "mahasiswa@jalankita.com",
+            ),
+            const SizedBox(height: 10),
+            const ProfileInfoItem(
+              icon: Icons.perm_identity,
+              title: "NIK",
+              value: "1234567890123456",
+            ),
+            const SizedBox(height: 10),
+            const ProfileInfoItem(
+              icon: Icons.home_outlined,
+              title: "Alamat Lengkap",
+              value: "Jl. Merdeka No. 123, Jakarta",
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
 
             // 3. Tombol Edit
             SizedBox(
@@ -83,10 +106,12 @@ class ProfilePage extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () {
                   // Navigasi ke Halaman Edit Profil
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const EditProfilePage()),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfilePage(),
+                    ),
+                  );
                 },
                 icon: const Icon(Icons.edit),
                 label: const Text("EDIT PROFIL"),

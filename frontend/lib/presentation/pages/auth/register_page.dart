@@ -32,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const Text(
                 "Buat Akun",
                 style: TextStyle(
-                  fontSize: 28, 
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -40,12 +40,18 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 8),
               Text(
                 "Bergabung bersama kami untuk infrastruktur yang lebih baik.",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
               ),
               const SizedBox(height: 32),
+
+              // Username Akun
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Username Akun',
+                  prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 10),
 
               // Nama Lengkap
               TextFormField(
@@ -54,7 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Nomor HP
               TextFormField(
@@ -64,7 +70,26 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.phone_android, color: Colors.grey),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
+
+              // NIK
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'NIK',
+                  prefixIcon: Icon(Icons.perm_identity, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Alamat Lengkap
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Alamat Lengkap',
+                  prefixIcon: Icon(Icons.home_outlined, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 10),
 
               // Email
               TextFormField(
@@ -74,14 +99,17 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Password
               TextFormField(
                 obscureText: _isObscure,
                 decoration: InputDecoration(
                   labelText: 'Kata Sandi',
-                  prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: Colors.grey,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isObscure ? Icons.visibility_off : Icons.visibility,
@@ -95,7 +123,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Konfirmasi Password
               TextFormField(
@@ -105,7 +133,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isObscureConfirm ? Icons.visibility_off : Icons.visibility,
+                      _isObscureConfirm
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -116,7 +146,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               // Register Button
               ElevatedButton(
@@ -125,7 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
                 child: const Text("DAFTAR"),
               ),
-              
+
               const SizedBox(height: 24),
 
               // Login Link
