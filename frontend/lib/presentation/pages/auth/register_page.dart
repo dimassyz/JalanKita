@@ -150,7 +150,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Username
               TextFormField(
@@ -182,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.phone_android, color: Colors.grey),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Email
               TextFormField(
@@ -193,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Alamat Lengkap
               TextFormField(
@@ -233,7 +233,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Konfirmasi Password
               TextFormField(
@@ -257,7 +257,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               // Register Button
               ElevatedButton(
