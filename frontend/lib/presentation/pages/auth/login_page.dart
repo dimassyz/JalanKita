@@ -3,8 +3,8 @@ import 'package:frontend/app_theme.dart';
 import 'package:frontend/data/service/http_service.dart';
 import 'package:frontend/data/repository/auth_repository.dart';
 import 'package:frontend/data/usecase/request/login_request.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/presentation/pages/auth/register_page.dart';
-import 'package:frontend/presentation/pages/profile/profile_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
+          MaterialPageRoute(builder: (context) => const MyHomePage(title: 'JalanKita',)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
