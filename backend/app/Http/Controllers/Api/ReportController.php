@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
+    
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
