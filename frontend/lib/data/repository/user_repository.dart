@@ -2,17 +2,18 @@ import 'dart:io';
 
 import 'package:frontend/data/service/http_service.dart';
 import 'package:frontend/data/usecase/response/auth_response.dart';
+import 'package:frontend/data/usecase/response/user_response.dart';
 
 class UserRepository {
   final HttpService httpService;
   UserRepository(this.httpService);
 
-  Future<AuthResponse> getProfile() async {
+  Future<UserResponse> getProfile() async {
     final response = await httpService.get('user');
-    return AuthResponse.fromJson(response.body);
+    return UserResponse.fromJson(response.body);
   }
 
-  Future<AuthResponse> updateProfile({
+  Future<UserResponse> updateProfile({
     required String name,
     required String phone,
     required String alamat,
@@ -30,6 +31,6 @@ class UserRepository {
       imageFile,
       'profile_picture',
     );
-    return AuthResponse.fromJson(response.body);
+    return UserResponse.fromJson(response.body);
   }
 }
