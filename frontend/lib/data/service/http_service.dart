@@ -46,9 +46,16 @@ class HttpService {
     try {
       final url = Uri.parse('$baseURL$endPoint');
       final request = http.MultipartRequest('POST', url);
-      // Add fields
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      request.headers.addAll({
+        'Accept': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
+
       request.fields.addAll(fields);
-      // Add file if available
+
       if (file != null) {
         final imageFile = await http.MultipartFile.fromPath(
           fileFieldName,
@@ -60,7 +67,7 @@ class HttpService {
       log('POST with File to: $url');
       log('Fields: ${request.fields}');
       log('Files: ${request.files.length}');
-      // Send request
+
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       log('POST with File Response: ${response.statusCode} - ${response.body}');

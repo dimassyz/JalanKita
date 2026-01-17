@@ -103,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               image: _user?.profilePicture != null
                                   ? DecorationImage(
                                       image: NetworkImage(
-                                        "http://10.0.2.2:8000/storage/${_user!.profilePicture}",
+                                        "http://192.168.1.6:8000/storage/${_user!.profilePicture}",
                                       ),
                                       fit: BoxFit.cover,
                                     )
@@ -173,7 +173,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const EditProfilePage(),
+                              builder: (context) =>
+                                  EditProfilePage(user: _user),
                             ),
                           );
                           if (result == true) _fetchProfile();
