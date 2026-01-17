@@ -10,26 +10,18 @@ class HistoryPage extends StatelessWidget {
       "title": "Jalan Berlubang Parah",
       "date": "10 Januari 2026",
       "status": "Selesai",
-      "location": "Jl. Mawar No. 10"
     },
     {
       "title": "Aspal Retak Depan SD",
       "date": "11 Januari 2026",
       "status": "Diproses",
-      "location": "Jl. Kenanga No. 5"
     },
     {
       "title": "Lampu Jalan Mati Total",
       "date": "12 Januari 2026",
       "status": "Pending",
-      "location": "Jl. Anggrek Raya"
     },
-     {
-      "title": "Laporan Iseng",
-      "date": "13 Januari 2026",
-      "status": "Ditolak",
-      "location": "Rumah Sendiri"
-    },
+    {"title": "Laporan Iseng", "date": "13 Januari 2026", "status": "Ditolak"},
   ];
 
   @override
@@ -41,9 +33,16 @@ class HistoryPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.history_toggle_off, size: 80, color: Colors.grey),
+                  const Icon(
+                    Icons.history_toggle_off,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 16),
-                  Text("Belum ada laporan", style: TextStyle(color: Colors.grey[400])),
+                  Text(
+                    "Belum ada laporan",
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
                 ],
               ),
             )
@@ -66,10 +65,14 @@ class ReportCard extends StatelessWidget {
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'Selesai': return JalanKitaTheme.statusDone;
-      case 'Diproses': return JalanKitaTheme.statusProcess;
-      case 'Ditolak': return JalanKitaTheme.statusRejected;
-      default: return JalanKitaTheme.statusPending;
+      case 'Selesai':
+        return JalanKitaTheme.statusDone;
+      case 'Diproses':
+        return JalanKitaTheme.statusProcess;
+      case 'Ditolak':
+        return JalanKitaTheme.statusRejected;
+      default:
+        return JalanKitaTheme.statusPending;
     }
   }
 
@@ -95,7 +98,7 @@ class ReportCard extends StatelessWidget {
               child: const Icon(Icons.image, color: Colors.white54),
             ),
             const SizedBox(width: 16),
-            
+
             // Info Text
             Expanded(
               child: Column(
@@ -103,11 +106,17 @@ class ReportCard extends StatelessWidget {
                 children: [
                   // Badge Status
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(data['status']).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: _getStatusColor(data['status']), width: 1),
+                      border: Border.all(
+                        color: _getStatusColor(data['status']),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       data['status'],
@@ -119,25 +128,28 @@ class ReportCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Judul
                   Text(
                     data['title'],
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  
-                  // Tanggal & Lokasi
+
+                  // Tanggal
                   Text(
-                    "${data['date']} • ${data['location']}",
+                    "${data['date']}",
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
                 ],
               ),
             ),
-            
+
             // Arrow Icon
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],

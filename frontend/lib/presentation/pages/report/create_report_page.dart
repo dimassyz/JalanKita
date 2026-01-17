@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:geolocator/geolocator.dart';
 class CreateReportPage extends StatefulWidget {
   const CreateReportPage({super.key});
 
@@ -12,8 +12,11 @@ class CreateReportPage extends StatefulWidget {
 
 class _CreateReportPageState extends State<CreateReportPage> {
   File? _imageFile;
-
   final ImagePicker _picker = ImagePicker();
+
+  Position? _currentPosition; // Menyimpan koordinat (Latitude, Longitude)
+  bool _isGettingLocation = false; // Indikator Loading GPS
+  String _addressMessage = "Belum ada lokasi"; // Pesan status lokasi
 
   Future<void> _getImageFromCamera() async {
     try {
@@ -21,7 +24,6 @@ class _CreateReportPageState extends State<CreateReportPage> {
         source: ImageSource.camera,
         imageQuality: 50,
       );
-
       // Jika user berhasil ambil foto
       if (pickedFile != null) {
         setState(() {
@@ -40,6 +42,61 @@ class _CreateReportPageState extends State<CreateReportPage> {
     setState(() {
       _imageFile = null;
     });
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isGettingLocation = true; // Mulai loading
+    });
+
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      // Mengecek apakah GPS HP menyala
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw 'Layanan lokasi (GPS) nonaktif. Harap mengaktifkan GPS.';
+      }
+
+      // Mengecek izin aplikasi
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw 'Izin lokasi ditolak.';
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw 'Izin lokasi ditolak permanen. Buka pengaturan HP.';
+      }
+
+      // Mengambil Lokasi Saat Ini
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high 
+      );
+
+      setState(() {
+        _currentPosition = position;
+        _addressMessage = "Lokasi Berhasil Didapat";
+      });
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: JalanKitaTheme.statusRejected,
+        ),
+      );
+      setState(() {
+        _addressMessage = "Gagal mengambil lokasi";
+      });
+    } finally {
+      setState(() {
+        _isGettingLocation = false; // Stop loading
+      });
+    }
   }
 
   @override
@@ -112,41 +169,61 @@ class _CreateReportPageState extends State<CreateReportPage> {
             const SizedBox(height: 16),
 
             // Lokasi (GPS Preview)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: JalanKitaTheme.inputColor.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.location_on,
-                    color: JalanKitaTheme.primaryColor,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Lokasi Terdeteksi",
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+            InkWell(
+              onTap: _getCurrentLocation, // klik manual untuk refresh
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: JalanKitaTheme.inputColor.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _currentPosition != null 
+                        ? JalanKitaTheme.statusDone
+                        : Colors.transparent
+                  )
+                ),
+                child: Row(
+                  children: [
+                    // Ikon Spinner jika loading
+                    _isGettingLocation 
+                      ? const SizedBox(
+                          width: 24, height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          Icons.location_on, 
+                          color: _currentPosition != null 
+                              ? JalanKitaTheme.statusDone 
+                              : JalanKitaTheme.primaryColor
                         ),
-                        Text(
-                          "-7.250445, 112.768845", // Dummy Coordinates
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Koordinat Lokasi",
+                            style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                          // Menampilkan Koordinat Asli atau Placeholder
+                          Text(
+                            _currentPosition != null 
+                                ? "${_currentPosition!.latitude}, ${_currentPosition!.longitude}"
+                                : _addressMessage,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _currentPosition != null ? Colors.white : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.refresh, color: Colors.white),
-                    onPressed: () {
-                      // TODO: Refresh GPS Logic
-                    },
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      onPressed: _getCurrentLocation,
+                      tooltip: "Perbarui Lokasi",
+                    )
+                  ],
+                ),
               ),
             ),
 
@@ -173,7 +250,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
             TextFormField(
               maxLines: 4,
               decoration: const InputDecoration(
-                hintText: 'Jelaskan kondisi kerusakan secara singkat...',
+                hintText: 'Jelaskan kondisi kerusakan...',
                 labelText: 'Deskripsi Kerusakan',
                 alignLabelWithHint: true,
               ),
@@ -187,6 +264,20 @@ class _CreateReportPageState extends State<CreateReportPage> {
               child: ElevatedButton.icon(
                 onPressed: () {
                   // TODO: Logic Kirim Data ke API
+                  if (_imageFile == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Mohon ambil foto bukti kerusakan!"),
+                        backgroundColor: JalanKitaTheme.statusRejected));
+                  } else if (_currentPosition == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Lokasi belum terdeteksi. Harap nyalakan GPS!"),
+                        backgroundColor: JalanKitaTheme.statusRejected));
+                  } else {
+                    // Logic kirim data...
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Mengirim Laporan...")),
+                    );
+                  }
                 },
                 icon: const Icon(Icons.send_rounded),
                 label: const Text("KIRIM LAPORAN"),
