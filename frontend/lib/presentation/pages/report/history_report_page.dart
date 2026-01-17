@@ -1,75 +1,169 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/data/model/report.dart';
+import 'package:frontend/data/repository/report_repository.dart';
+import 'package:frontend/data/service/http_service.dart';
+import 'package:intl/intl.dart';
 
-class HistoryPage extends StatelessWidget {
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
-  // Dummy Data untuk Simulasi
-  final List<Map<String, dynamic>> dummyReports = const [
-    {
-      "title": "Jalan Berlubang Parah",
-      "date": "10 Januari 2026",
-      "status": "Selesai",
-      "location": "Jl. Mawar No. 10"
-    },
-    {
-      "title": "Aspal Retak Depan SD",
-      "date": "11 Januari 2026",
-      "status": "Diproses",
-      "location": "Jl. Kenanga No. 5"
-    },
-    {
-      "title": "Lampu Jalan Mati Total",
-      "date": "12 Januari 2026",
-      "status": "Pending",
-      "location": "Jl. Anggrek Raya"
-    },
-     {
-      "title": "Laporan Iseng",
-      "date": "13 Januari 2026",
-      "status": "Ditolak",
-      "location": "Rumah Sendiri"
-    },
-  ];
+  @override
+  State<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  final ReportRepository _reportRepository = ReportRepository(HttpService());
+  List<Report> _reports = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final reports = await _reportRepository.getUserReports();
+      setState(() {
+        _reports = reports;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Gagal memuat laporan: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '-';
+    return DateFormat('dd MMM yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Riwayat Laporan")),
-      body: dummyReports.isEmpty
+      appBar: AppBar(
+        title: const Text("Riwayat Laporan"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadReports,
+            tooltip: 'Refresh',
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.history_toggle_off, size: 80, color: Colors.grey),
+                  const Icon(Icons.error_outline, size: 80, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text("Belum ada laporan", style: TextStyle(color: Colors.grey[400])),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _loadReports,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Coba Lagi'),
+                  ),
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: dummyReports.length,
-              itemBuilder: (context, index) {
-                final report = dummyReports[index];
-                return ReportCard(data: report);
-              },
+          : _reports.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.history_toggle_off,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Belum ada laporan",
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadReports,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _reports.length,
+                itemBuilder: (context, index) {
+                  final report = _reports[index];
+                  return ReportCard(
+                    report: report,
+                    formattedDate: _formatDate(report.createdAt),
+                  );
+                },
+              ),
             ),
     );
   }
 }
 
-// Widget Kartu Laporan Custom
+// Widget Kartu Laporan
 class ReportCard extends StatelessWidget {
-  final Map<String, dynamic> data;
-  const ReportCard({super.key, required this.data});
+  final Report report;
+  final String formattedDate;
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Selesai': return JalanKitaTheme.statusDone;
-      case 'Diproses': return JalanKitaTheme.statusProcess;
-      case 'Ditolak': return JalanKitaTheme.statusRejected;
-      default: return JalanKitaTheme.statusPending;
+  const ReportCard({
+    super.key,
+    required this.report,
+    required this.formattedDate,
+  });
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'done':
+      case 'selesai':
+      case 'completed':
+        return JalanKitaTheme.statusDone;
+      case 'progress':
+      case 'diproses':
+      case 'process':
+        return JalanKitaTheme.statusProcess;
+      case 'rejected':
+      case 'ditolak':
+      case 'reject':
+        return JalanKitaTheme.statusRejected;
+      case 'pending':
+        return JalanKitaTheme.statusPending;
+      default:
+        return JalanKitaTheme.statusPending;
+    }
+  }
+
+  String _getStatusLabel(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'done':
+        return 'Selesai';
+      case 'progress':
+        return 'Diproses';
+      case 'rejected':
+        return 'Ditolak';
+      case 'pending':
+        return 'Pending';
+      default:
+        return status ?? 'Pending';
     }
   }
 
@@ -88,56 +182,87 @@ class ReportCard extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.image, color: Colors.white54),
+              margin: const EdgeInsets.only(right: 12),
+              child: report.image != null && report.image!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        report.image!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.broken_image,
+                            color: Colors.white54,
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      ),
+                    )
+                  : const Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
             ),
-            const SizedBox(width: 16),
-            
-            // Info Text
+
+            // Konten Laporan
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Badge Status
+                  // Status Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(data['status']).withOpacity(0.2),
+                      color: _getStatusColor(report.status).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: _getStatusColor(data['status']), width: 1),
+                      border: Border.all(
+                        color: _getStatusColor(report.status),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
-                      data['status'],
+                      _getStatusLabel(report.status),
                       style: TextStyle(
-                        color: _getStatusColor(data['status']),
+                        color: _getStatusColor(report.status),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Judul
                   Text(
-                    data['title'],
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    report.title ?? 'Tanpa Judul',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Tanggal & Lokasi
                   Text(
-                    "${data['date']} • ${data['location']}",
+                    "$formattedDate • ${report.latitude ?? '-'}, ${report.longitude ?? '-'}",
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            
+
             // Arrow Icon
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],

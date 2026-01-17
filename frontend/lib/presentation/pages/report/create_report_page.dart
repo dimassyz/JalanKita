@@ -8,7 +8,9 @@ import 'package:frontend/data/repository/report_repository.dart';
 import 'package:frontend/data/usecase/request/create_report_request.dart';
 
 class CreateReportPage extends StatefulWidget {
-  const CreateReportPage({super.key});
+  final VoidCallback? onReportSubmitted;
+
+  const CreateReportPage({super.key, this.onReportSubmitted});
 
   @override
   State<CreateReportPage> createState() => _CreateReportPageState();
@@ -214,15 +216,29 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
       if (response.status == 'success') {
         // Tampilkan pesan sukses
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.message ?? "Laporan berhasil dikirim!"),
             backgroundColor: JalanKitaTheme.statusDone,
+            duration: const Duration(seconds: 2),
           ),
         );
 
-        // Kembali ke halaman sebelumnya
-        Navigator.pop(context, true); // true = berhasil submit
+        // Clear form setelah berhasil
+        _titleController.clear();
+        _descriptionController.clear();
+        setState(() {
+          _imageFile = null;
+          _currentPosition = null;
+          _addressMessage = "Belum ada lokasi";
+        });
+
+        // Panggil callback untuk pindah ke tab Riwayat
+        await Future.delayed(const Duration(milliseconds: 800));
+        if (widget.onReportSubmitted != null) {
+          widget.onReportSubmitted!();
+        }
       } else {
         // Tampilkan pesan error dari server
         ScaffoldMessenger.of(context).showSnackBar(
