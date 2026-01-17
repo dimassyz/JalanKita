@@ -11,6 +11,7 @@ class User {
   final DateTime? updatedAt;
   final DateTime? createdAt;
   final int? id;
+  final String? profilePicture;
 
   User({
     this.name,
@@ -23,6 +24,7 @@ class User {
     this.updatedAt,
     this.createdAt,
     this.id,
+    this.profilePicture,
   });
 
   User copyWith({
@@ -36,6 +38,7 @@ class User {
     DateTime? updatedAt,
     DateTime? createdAt,
     int? id,
+    String? profilePicture,
   }) => User(
     name: name ?? this.name,
     username: username ?? this.username,
@@ -47,6 +50,7 @@ class User {
     updatedAt: updatedAt ?? this.updatedAt,
     createdAt: createdAt ?? this.createdAt,
     id: id ?? this.id,
+    profilePicture: profilePicture ?? this.profilePicture,
   );
 
   factory User.fromJson(String str) => User.fromMap(json.decode(str));
@@ -68,6 +72,7 @@ class User {
         ? null
         : DateTime.parse(json["created_at"]),
     id: json["id"],
+    profilePicture: json["profile_picture"],
   );
 
   Map<String, dynamic> toMap() => {
@@ -81,5 +86,6 @@ class User {
     "updated_at": updatedAt?.toIso8601String(),
     "created_at": createdAt?.toIso8601String(),
     "id": id,
+    "profile_picture": profilePicture,
   };
 }
