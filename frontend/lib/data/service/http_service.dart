@@ -40,6 +40,10 @@ class HttpService {
     try {
       final url = Uri.parse('$baseURL$endPoint');
       final request = http.MultipartRequest('POST', url);
+
+      // Add headers - PENTING: jangan set Content-Type untuk multipart
+      request.headers['Accept'] = 'application/json';
+
       // Add fields
       request.fields.addAll(fields);
       // Add file if available

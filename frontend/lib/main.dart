@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:frontend/presentation/pages/auth/login_page.dart';
 import 'package:frontend/presentation/pages/profile/profile_page.dart';
-import 'package:frontend/presentation/pages/report/create_report_page.dart';
+import 'package:frontend/presentation/pages/report/create_report_page.dart' hide Icon;
 import 'package:frontend/presentation/pages/report/history_report_page.dart';
 
 void main() {
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.add_a_photo_outlined),
             activeIcon: Icon(Icons.add_a_photo),
