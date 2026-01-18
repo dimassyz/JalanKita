@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:frontend/data/service/http_service.dart';
-import 'package:frontend/data/repository/report_repository.dart';
-import 'package:frontend/data/usecase/request/create_report_request.dart';
-
 class CreateReportPage extends StatefulWidget {
   final VoidCallback? onReportSubmitted;
 
@@ -23,23 +19,6 @@ class _CreateReportPageState extends State<CreateReportPage> {
   Position? _currentPosition; // Menyimpan koordinat (Latitude, Longitude)
   bool _isGettingLocation = false; // Indikator Loading GPS
   String _addressMessage = "Belum ada lokasi"; // Pesan status lokasi
-
-  // Controllers untuk form
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-
-  // Loading state
-  bool _isSubmitting = false;
-
-  // Repository
-  final ReportRepository _reportRepository = ReportRepository(HttpService());
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
 
   Future<void> _getImageFromCamera() async {
     try {
@@ -97,7 +76,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
       // Mengambil Lokasi Saat Ini
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: LocationAccuracy.high 
       );
 
       setState(() {
@@ -105,13 +84,6 @@ class _CreateReportPageState extends State<CreateReportPage> {
         _addressMessage = "Lokasi Berhasil Didapat";
       });
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Lokasi berhasil diambil!"),
-          backgroundColor: JalanKitaTheme.statusDone,
-        ),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -126,138 +98,6 @@ class _CreateReportPageState extends State<CreateReportPage> {
       setState(() {
         _isGettingLocation = false; // Stop loading
       });
-    }
-  }
-
-  Future<void> _handleSubmitReport() async {
-    // Validasi: Gambar harus ada
-    if (_imageFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Mohon ambil foto bukti kerusakan!"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
-      return;
-    }
-
-    // Validasi: Lokasi harus ada
-    if (_currentPosition == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Lokasi belum terdeteksi. Harap nyalakan GPS!"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
-      return;
-    }
-
-    // Validasi: Judul harus diisi
-    if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Judul laporan harus diisi!"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
-      return;
-    }
-
-    // Validasi: Deskripsi harus diisi
-    if (_descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Deskripsi kerusakan harus diisi!"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
-      return;
-    }
-
-    // Validasi: Judul minimal 5 karakter
-    if (_titleController.text.trim().length < 5) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Judul laporan minimal 5 karakter!"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
-      return;
-    }
-
-    // Validasi: Deskripsi minimal 50 karakter
-    if (_descriptionController.text.trim().length < 50) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Deskripsi minimal 50 karakter!"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
-      return;
-    }
-
-    // Semua validasi lolos, mulai proses submit
-    setState(() => _isSubmitting = true);
-
-    try {
-      final request = CreateReportRequest(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        image: _imageFile!,
-        latitude: _currentPosition!.latitude,
-        longitude: _currentPosition!.longitude,
-      );
-
-      final response = await _reportRepository.createReport(request);
-
-      setState(() => _isSubmitting = false);
-
-      if (!mounted) return;
-
-      if (response.status == 'success') {
-        // Tampilkan pesan sukses
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.message ?? "Laporan berhasil dikirim!"),
-            backgroundColor: JalanKitaTheme.statusDone,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-
-        // Clear form setelah berhasil
-        _titleController.clear();
-        _descriptionController.clear();
-        setState(() {
-          _imageFile = null;
-          _currentPosition = null;
-          _addressMessage = "Belum ada lokasi";
-        });
-
-        // Panggil callback untuk pindah ke tab Riwayat
-        await Future.delayed(const Duration(milliseconds: 800));
-        if (widget.onReportSubmitted != null) {
-          widget.onReportSubmitted!();
-        }
-      } else {
-        // Tampilkan pesan error dari server
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.message ?? "Gagal mengirim laporan"),
-            backgroundColor: JalanKitaTheme.statusRejected,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() => _isSubmitting = false);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Gagal terhubung ke server: $e"),
-          backgroundColor: JalanKitaTheme.statusRejected,
-        ),
-      );
     }
   }
 
@@ -339,48 +179,40 @@ class _CreateReportPageState extends State<CreateReportPage> {
                   color: JalanKitaTheme.inputColor.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _currentPosition != null
+                    color: _currentPosition != null 
                         ? JalanKitaTheme.statusDone
-                        : Colors.transparent,
-                  ),
+                        : Colors.transparent
+                  )
                 ),
                 child: Row(
                   children: [
                     // Ikon Spinner jika loading
-                    _isGettingLocation
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Icon(
-                            Icons.location_on,
-                            color: _currentPosition != null
-                                ? JalanKitaTheme.statusDone
-                                : JalanKitaTheme.primaryColor,
-                          ),
+                    _isGettingLocation 
+                      ? const SizedBox(
+                          width: 24, height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          Icons.location_on, 
+                          color: _currentPosition != null 
+                              ? JalanKitaTheme.statusDone 
+                              : JalanKitaTheme.primaryColor
+                        ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Koordinat Lokasi",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[400],
-                            ),
-                          ),
+                          Text("Koordinat Lokasi",
+                            style: TextStyle(fontSize: 12, color: Colors.grey[400])),
                           // Menampilkan Koordinat Asli atau Placeholder
                           Text(
-                            _currentPosition != null
+                            _currentPosition != null 
                                 ? "${_currentPosition!.latitude}, ${_currentPosition!.longitude}"
                                 : _addressMessage,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: _currentPosition != null
-                                  ? Colors.white
-                                  : Colors.grey,
+                              color: _currentPosition != null ? Colors.white : Colors.grey,
                             ),
                           ),
                         ],
@@ -390,7 +222,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                       icon: const Icon(Icons.refresh, color: Colors.white),
                       onPressed: _getCurrentLocation,
                       tooltip: "Perbarui Lokasi",
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -432,19 +264,29 @@ class _CreateReportPageState extends State<CreateReportPage> {
             const SizedBox(height: 24),
 
             // Tombol Kirim
-            ElevatedButton.icon(
-              onPressed: _isSubmitting ? null : _handleSubmitReport,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.send_rounded),
-              label: Text(_isSubmitting ? "MENGIRIM..." : "KIRIM LAPORAN"),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // TODO: Logic Kirim Data ke API
+                  if (_imageFile == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Mohon ambil foto bukti kerusakan!"),
+                        backgroundColor: JalanKitaTheme.statusRejected));
+                  } else if (_currentPosition == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Lokasi belum terdeteksi. Harap nyalakan GPS!"),
+                        backgroundColor: JalanKitaTheme.statusRejected));
+                  } else {
+                    // Logic kirim data...
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Mengirim Laporan...")),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.send_rounded),
+                label: const Text("KIRIM LAPORAN"),
+              ),
             ),
           ],
         ),

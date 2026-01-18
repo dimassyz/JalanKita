@@ -1,150 +1,140 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/data/model/report.dart';
+import 'package:frontend/data/repository/report_repository.dart';
+import 'package:frontend/data/service/http_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
-class DetailReportPage extends StatelessWidget {
-  final Map<String, dynamic> data;
+class DetailReportPage extends StatefulWidget {
+  final Report report;
+  const DetailReportPage({super.key, required this.report});
 
-  const DetailReportPage({super.key, required this.data});
+  @override
+  State<DetailReportPage> createState() => _DetailReportPageState();
+}
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Selesai': return JalanKitaTheme.statusDone;
-      case 'Diproses': return JalanKitaTheme.statusProcess;
-      case 'Ditolak': return JalanKitaTheme.statusRejected;
-      default: return JalanKitaTheme.statusPending;
-    }
+class _DetailReportPageState extends State<DetailReportPage> {
+  bool _isLoading = false;
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  // Logic Dummy Export PDF (Logic asli nanti dipegang Student B)
-  void _exportToPDF(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Mengunduh Laporan dalam bentuk PDF..."),
-        backgroundColor: JalanKitaTheme.primaryColor,
-      ),
-    );
+  Future<void> _exportPdf() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final repo = ReportRepository(HttpService());
+      final bytes = await repo.exportPdf(widget.report.id);
+
+      if (bytes != null) {
+        final Directory? externalDir = await getExternalStorageDirectory();
+
+        if (externalDir == null) {
+          _showSnackBar("Gagal mendapatkan akses penyimpanan luar.");
+          return;
+        }
+
+        final fileName = "Bukti_Lapor_${widget.report.id}.pdf";
+        final filePath = "${externalDir.path}/$fileName";
+
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+
+        if (!mounted) return;
+        _showSnackBar("PDF berhasil di download di: $fileName");
+      }
+    } catch (e) {
+      _showSnackBar("Gagal mendownload PDF: $e");
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final r = widget.report;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Detail Laporan"),
         actions: [
-          // Shortcut Share Button (Opsional)
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {},
-          )
+          _isLoading
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  onPressed: _exportPdf,
+                ),
         ],
       ),
+
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Gambar Bukti Kerusakan (Besar)
-            Container(
-              height: 300,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                "http://192.168.1.6:8000/storage/${r.imagePath}",
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
               ),
-              child: const Icon(Icons.image, size: 100, color: Colors.white54),
-              // Nanti di sini pakai: Image.network(data['imageUrl'])
+            ),
+            const SizedBox(height: 24),
+
+            Text(
+              r.title,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: JalanKitaTheme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: JalanKitaTheme.primaryColor),
+              ),
+              child: Text(
+                r.status.toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const Divider(height: 40),
+
+            const Text(
+              "Deskripsi Kerusakan:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              r.description,
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 2. Status Badge & Tanggal
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(data['status']).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: _getStatusColor(data['status'])),
-                        ),
-                        child: Text(
-                          data['status'],
-                          style: TextStyle(
-                            color: _getStatusColor(data['status']),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        data['date'],
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 20),
-
-                  // 3. Judul Laporan
-                  Text(
-                    data['title'],
-                    style: const TextStyle(
-                      fontSize: 22, 
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 4. Lokasi
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, color: JalanKitaTheme.primaryColor, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          data['location'],
-                          style: TextStyle(color: Colors.grey[300], fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const Divider(height: 40, color: Colors.grey),
-
-                  // 5. Deskripsi
-                  const Text(
-                    "Deskripsi",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    data['description'] ?? "Tidak ada deskripsi.",
-                    style: TextStyle(color: Colors.grey[400], height: 1.5),
-                    textAlign: TextAlign.justify,
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // 6. Tombol Export PDF
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _exportToPDF(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: JalanKitaTheme.inputColor,
-                        foregroundColor: JalanKitaTheme.primaryColor,
-                        side: const BorderSide(color: JalanKitaTheme.primaryColor),
-                      ),
-                      icon: const Icon(Icons.picture_as_pdf),
-                      label: const Text("EXPORT LAPORAN (PDF)"),
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 24),
+            const Text(
+              "Lokasi GPS:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.location_on, color: Colors.red),
+              title: Text("${r.latitude ?? "-"}, ${r.longitude ?? "-"}"),
+              subtitle: const Text("Koordinat otomatis terdeteksi"),
             ),
           ],
         ),
