@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class HttpService {
@@ -10,9 +10,15 @@ class HttpService {
 
   Future<http.Response> get(String endpoint) async {
     final url = Uri.parse('$baseURL$endpoint');
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
     final response = await http.get(
       url,
-      headers: {'Accept': 'application/json'},
+      headers: {
+        'Accept': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
     );
     log(response.body);
     return response;
@@ -40,9 +46,20 @@ class HttpService {
     try {
       final url = Uri.parse('$baseURL$endPoint');
       final request = http.MultipartRequest('POST', url);
-      // Add fields
+
+      // Add headers - PENTING: jangan set Content-Type untuk multipart
+      request.headers['Accept'] = 'application/json';
+
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      request.headers.addAll({
+        'Accept': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
+
       request.fields.addAll(fields);
-      // Add file if available
+
       if (file != null) {
         final imageFile = await http.MultipartFile.fromPath(
           fileFieldName,
@@ -54,7 +71,7 @@ class HttpService {
       log('POST with File to: $url');
       log('Fields: ${request.fields}');
       log('Files: ${request.files.length}');
-      // Send request
+
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       log('POST with File Response: ${response.statusCode} - ${response.body}');

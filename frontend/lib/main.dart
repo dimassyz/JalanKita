@@ -38,16 +38,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0; // Default: 0 (Halaman Form)
 
-  // List Halaman yang akan ditampilkan
-  final List<Widget> _pages = [
-    const CreateReportPage(), // Index 0
-    const HistoryPage(), // Index 1
-    const ProfilePage(), // Index 2
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void _onReportSubmitted() {
+    // Pindah ke tab Riwayat setelah laporan berhasil dikirim
+    setState(() {
+      _selectedIndex = 1;
     });
   }
 
@@ -55,13 +55,20 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Body berubah sesuai index yang dipilih
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          CreateReportPage(onReportSubmitted: _onReportSubmitted), // Index 0
+          const HistoryPage(), // Index 1
+          const ProfilePage(), // Index 2
+        ],
+      ),
 
       // Footer Bar (Bottom Navigation)
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.add_a_photo_outlined),
             activeIcon: Icon(Icons.add_a_photo),
