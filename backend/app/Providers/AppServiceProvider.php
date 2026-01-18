@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +30,10 @@ public function boot(): void
             SecurityScheme::http('bearer')
         );
     });
+
+    Route::middleware('api')
+    ->prefix('api')
+    ->group(base_path('routes/api.php'));
 }
 }
 
