@@ -4,7 +4,9 @@ import 'package:frontend/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 class CreateReportPage extends StatefulWidget {
-  const CreateReportPage({super.key});
+  final VoidCallback? onReportSubmitted;
+
+  const CreateReportPage({super.key, this.onReportSubmitted});
 
   @override
   State<CreateReportPage> createState() => _CreateReportPageState();
@@ -102,7 +104,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Buat Laporan Baru")),
+      appBar: AppBar(title: Text("Buat Laporan Baru")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -119,7 +121,6 @@ class _CreateReportPageState extends State<CreateReportPage> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.withOpacity(0.3)),
                   ),
-                  
                   child: _imageFile != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(16),
@@ -238,8 +239,10 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
             // Judul
             TextFormField(
+              controller: _titleController,
+              enabled: !_isSubmitting,
               decoration: const InputDecoration(
-                hintText: 'Contoh: Jalan Berlubang di Depan Pasar',
+                hintText: 'ex: Jalan Berlubang di Depan Pasar',
                 labelText: 'Judul Laporan',
                 prefixIcon: Icon(Icons.title, color: Colors.grey),
               ),
@@ -248,6 +251,8 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
             // Deskripsi
             TextFormField(
+              controller: _descriptionController,
+              enabled: !_isSubmitting,
               maxLines: 4,
               decoration: const InputDecoration(
                 hintText: 'Jelaskan kondisi kerusakan...',

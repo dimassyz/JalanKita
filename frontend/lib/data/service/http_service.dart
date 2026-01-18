@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class HttpService {
-  final String baseURL = 'http://192.168.1.6:8000/api/';
+  final String baseURL = 'http://192.168.43.14:5000/api/';
   // final String baseURL = 'http://127.0.0.1:8000/api/';
 
   Future<http.Response> get(String endpoint) async {
@@ -46,6 +46,10 @@ class HttpService {
     try {
       final url = Uri.parse('$baseURL$endPoint');
       final request = http.MultipartRequest('POST', url);
+
+      // Add headers - PENTING: jangan set Content-Type untuk multipart
+      request.headers['Accept'] = 'application/json';
+
       final prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
 
