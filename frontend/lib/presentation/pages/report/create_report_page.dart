@@ -192,7 +192,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Buat Laporan Baru")),
+      appBar: AppBar(title: Text("Buat Laporan Baru", style: TextStyle(fontWeight: FontWeight.bold),)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -269,7 +269,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _currentPosition != null
-                        ? JalanKitaTheme.statusDone
+                        ? JalanKitaTheme.primaryColor
                         : Colors.transparent,
                   ),
                 ),
@@ -285,7 +285,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                         : Icon(
                             Icons.location_on,
                             color: _currentPosition != null
-                                ? JalanKitaTheme.statusDone
+                                ? JalanKitaTheme.primaryColor
                                 : JalanKitaTheme.primaryColor,
                           ),
                     const SizedBox(width: 12),

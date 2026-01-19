@@ -5,8 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class HttpService {
-  final String baseURL = 'http://10.112.163.140:5000/api/';
-  // final String baseURL = 'http://192.168.43.14:8000/api/';
+  final String baseURL = 'http://10.112.163.140:2000/api/';
+  // final String baseURL = 'http://192.168.43.14:5000/api/';
   // final String baseURL = 'http://localhost:8000/api/';
 
   Future<http.Response> get(String endpoint) async {
