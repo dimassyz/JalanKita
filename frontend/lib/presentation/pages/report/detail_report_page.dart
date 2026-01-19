@@ -84,7 +84,7 @@ class _DetailReportPageState extends State<DetailReportPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                "http://10.10.10.179:8000/storage/${r.imagePath}",
+                "http://192.168.1.6:8000/storage/${r.imagePath}",
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
