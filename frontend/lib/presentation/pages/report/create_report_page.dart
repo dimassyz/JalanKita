@@ -7,6 +7,7 @@ import 'package:frontend/data/usecase/request/create_report_request.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 
+
 class CreateReportPage extends StatefulWidget {
   final VoidCallback? onReportSubmitted;
 
@@ -24,8 +25,8 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
   Position? _currentPosition; // Menyimpan koordinat (Latitude, Longitude)
   bool _isGettingLocation = false; // Indikator Loading GPS
+  bool _isLoading = false; // Indikator Loading Submit
   String _addressMessage = "Belum ada lokasi"; // Pesan status lokasi
-  bool _isLoading = false;
 
   Future<void> _getImageFromCamera() async {
     try {
@@ -182,9 +183,16 @@ class _CreateReportPageState extends State<CreateReportPage> {
   }
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Buat Laporan Baru")),
+      appBar: AppBar(title: Text("Buat Laporan Baru", style: TextStyle(fontWeight: FontWeight.bold),)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -261,7 +269,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _currentPosition != null
-                        ? JalanKitaTheme.statusDone
+                        ? JalanKitaTheme.primaryColor
                         : Colors.transparent,
                   ),
                 ),
@@ -277,7 +285,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                         : Icon(
                             Icons.location_on,
                             color: _currentPosition != null
-                                ? JalanKitaTheme.statusDone
+                                ? JalanKitaTheme.primaryColor
                                 : JalanKitaTheme.primaryColor,
                           ),
                     const SizedBox(width: 12),

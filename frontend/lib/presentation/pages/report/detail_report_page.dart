@@ -62,7 +62,7 @@ class _DetailReportPageState extends State<DetailReportPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detail Laporan"),
+        title: const Text("Detail Laporan", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           _isLoading
               ? const Padding(
@@ -84,7 +84,7 @@ class _DetailReportPageState extends State<DetailReportPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                "http://192.168.1.6:8000/storage/${r.imagePath}",
+                "http://10.112.163.140:2000/storage/${r.imagePath}",
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
