@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:frontend/data/usecase/request/create_report_request.dart';
 import 'package:frontend/data/usecase/response/my_report_response.dart';
 import 'package:frontend/data/service/http_service.dart';
 import 'dart:typed_data';
+import 'package:frontend/data/usecase/response/create_report_response.dart';
 
 class ReportRepository {
   final HttpService httpService;
@@ -24,5 +28,19 @@ class ReportRepository {
       print("Error Export PDF: $e");
       return null;
     }
+  }
+
+  Future<CreateReportResponse> createReport(
+    CreateReportRequest request,
+    File imageFile,
+  ) async {
+    final response = await httpService.postWithFile(
+      'reports',
+      request.toMap(),
+      imageFile,
+      'image',
+    );
+
+    return CreateReportResponse.fromJson(response.body);
   }
 }

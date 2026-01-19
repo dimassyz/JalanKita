@@ -4,6 +4,7 @@ import 'package:frontend/data/model/report.dart';
 import 'package:frontend/data/repository/report_repository.dart';
 import 'package:frontend/data/service/http_service.dart';
 import 'package:frontend/presentation/widgets/report_card.dart';
+import 'package:frontend/data/usecase/response/my_report_response.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
