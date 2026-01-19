@@ -84,4 +84,6 @@ class Report {
     "updated_at": updatedAt.toIso8601String(),
     "image_url": imageUrl,
   };
+
+  void operator [](String other) {}
 }

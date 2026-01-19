@@ -5,13 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class HttpService {
-  final String baseURL = 'http://192.168.43.14:5000/api/';
-  // final String baseURL = 'http://127.0.0.1:8000/api/';
+  final String baseURL = 'http://192.168.1.6:8000/api/';
+  // final String baseURL = 'http://192.168.43.14:5000/api/';
+  // final String baseURL = 'http://localhost:8000/api/';
 
   Future<http.Response> get(String endpoint) async {
     final url = Uri.parse('$baseURL$endpoint');
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
+
+    print('DEBUG: Mencoba GET ke URL: $url');
 
     final response = await http.get(
       url,
@@ -26,6 +29,9 @@ class HttpService {
 
   Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
     final url = Uri.parse('$baseURL$endpoint');
+
+    print('DEBUG: Mencoba POST ke URL: $url');
+
     final response = await http.post(
       url,
       headers: {
@@ -100,17 +106,28 @@ class HttpService {
     String endPoint,
     Map<String, dynamic> body,
   ) async {
-    final url = Uri.parse('$baseURL$endPoint');
-    final response = await http.patch(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode(body),
-    );
-    log('PATCH Response: ${response.body}');
-    return response;
+    try {
+      final url = Uri.parse('$baseURL$endPoint');
+
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.patch(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      log('PATCH Response: ${response.statusCode} - ${response.body}');
+      return response;
+    } catch (e) {
+      log('Error in patch: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> delete(String endPoint) async {
