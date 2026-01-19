@@ -6,6 +6,7 @@ import 'package:frontend/data/usecase/response/my_report_response.dart';
 import 'package:frontend/data/service/http_service.dart';
 import 'dart:typed_data';
 import 'package:frontend/data/usecase/response/create_report_response.dart';
+import 'package:frontend/data/usecase/response/update_status_response.dart';
 
 class ReportRepository {
   final HttpService httpService;
@@ -48,5 +49,16 @@ class ReportRepository {
   Future<GetAllReportResponse> getAllReport() async {
     final response = await httpService.get('admin/reports');
     return GetAllReportResponse.fromJson(response.body);
+  }
+
+  Future<UpdateStatusResponse> updateReportStatus(
+    int reportId,
+    String newStatus,
+  ) async {
+    final response = await httpService.patch('admin/reports/$reportId/status', {
+      'status': newStatus,
+    });
+
+    return UpdateStatusResponse.fromJson(response.body);
   }
 }
