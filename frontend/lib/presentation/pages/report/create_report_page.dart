@@ -1,8 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/data/repository/report_repository.dart';
+import 'package:frontend/data/service/http_service.dart';
+import 'package:frontend/data/usecase/request/create_report_request.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+
 class CreateReportPage extends StatefulWidget {
   final VoidCallback? onReportSubmitted;
 
@@ -15,10 +19,13 @@ class CreateReportPage extends StatefulWidget {
 class _CreateReportPageState extends State<CreateReportPage> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
 
   Position? _currentPosition; // Menyimpan koordinat (Latitude, Longitude)
   bool _isGettingLocation = false; // Indikator Loading GPS
   String _addressMessage = "Belum ada lokasi"; // Pesan status lokasi
+  bool _isLoading = false;
 
   Future<void> _getImageFromCamera() async {
     try {
@@ -44,6 +51,80 @@ class _CreateReportPageState extends State<CreateReportPage> {
     setState(() {
       _imageFile = null;
     });
+  }
+
+  void _showSnackBar(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? JalanKitaTheme.statusRejected : Colors.green,
+      ),
+    );
+  }
+
+  void _resetForm() {
+    _titleController.clear();
+    _descController.clear();
+    setState(() {
+      _imageFile = null;
+      _currentPosition = null;
+      _addressMessage = "Belum ada lokasi";
+    });
+  }
+
+  void _handleSubmit() async {
+    if (_imageFile == null) {
+      _showSnackBar("Ambil foto kerusakan dulu!", isError: true);
+      return;
+    }
+
+    if (_currentPosition == null) {
+      _showSnackBar(
+        "Lokasi belum terdeteksi. Harap nyalakan GPS!",
+        isError: true,
+      );
+      return;
+    }
+
+    if (_titleController.text.isEmpty) {
+      _showSnackBar("Judul laporan tidak boleh kosong!", isError: true);
+      return;
+    }
+
+    if (_descController.text.isEmpty) {
+      _showSnackBar("Deskripsi laporan tidak boleh kosong!", isError: true);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final request = CreateReportRequest(
+        title: _titleController.text,
+        description: _descController.text,
+        latitude: _currentPosition!.latitude.toString(),
+        longitude: _currentPosition!.longitude.toString(),
+      );
+
+      final repo = ReportRepository(HttpService());
+      final response = await repo.createReport(request, _imageFile!);
+
+      if (!mounted) return;
+
+      if (response.status == "success") {
+        _showSnackBar("Laporan berhasil dibuat!");
+        _resetForm();
+      } else {
+        _showSnackBar(
+          response.message ?? "Gagal mengirim laporan",
+          isError: true,
+        );
+      }
+    } catch (e) {
+      _showSnackBar("Terjadi kesalahan: $e", isError: true);
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -76,14 +157,13 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
       // Mengambil Lokasi Saat Ini
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high 
+        desiredAccuracy: LocationAccuracy.high,
       );
 
       setState(() {
         _currentPosition = position;
         _addressMessage = "Lokasi Berhasil Didapat";
       });
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -121,6 +201,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.withOpacity(0.3)),
                   ),
+
                   child: _imageFile != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(16),
@@ -179,40 +260,48 @@ class _CreateReportPageState extends State<CreateReportPage> {
                   color: JalanKitaTheme.inputColor.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _currentPosition != null 
+                    color: _currentPosition != null
                         ? JalanKitaTheme.statusDone
-                        : Colors.transparent
-                  )
+                        : Colors.transparent,
+                  ),
                 ),
                 child: Row(
                   children: [
                     // Ikon Spinner jika loading
-                    _isGettingLocation 
-                      ? const SizedBox(
-                          width: 24, height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          Icons.location_on, 
-                          color: _currentPosition != null 
-                              ? JalanKitaTheme.statusDone 
-                              : JalanKitaTheme.primaryColor
-                        ),
+                    _isGettingLocation
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            Icons.location_on,
+                            color: _currentPosition != null
+                                ? JalanKitaTheme.statusDone
+                                : JalanKitaTheme.primaryColor,
+                          ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Koordinat Lokasi",
-                            style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                          Text(
+                            "Koordinat Lokasi",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[400],
+                            ),
+                          ),
                           // Menampilkan Koordinat Asli atau Placeholder
                           Text(
-                            _currentPosition != null 
+                            _currentPosition != null
                                 ? "${_currentPosition!.latitude}, ${_currentPosition!.longitude}"
                                 : _addressMessage,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: _currentPosition != null ? Colors.white : Colors.grey,
+                              color: _currentPosition != null
+                                  ? Colors.white
+                                  : Colors.grey,
                             ),
                           ),
                         ],
@@ -222,7 +311,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
                       icon: const Icon(Icons.refresh, color: Colors.white),
                       onPressed: _getCurrentLocation,
                       tooltip: "Perbarui Lokasi",
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -240,7 +329,6 @@ class _CreateReportPageState extends State<CreateReportPage> {
             // Judul
             TextFormField(
               controller: _titleController,
-              enabled: !_isSubmitting,
               decoration: const InputDecoration(
                 hintText: 'ex: Jalan Berlubang di Depan Pasar',
                 labelText: 'Judul Laporan',
@@ -251,8 +339,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
             // Deskripsi
             TextFormField(
-              controller: _descriptionController,
-              enabled: !_isSubmitting,
+              controller: _descController,
               maxLines: 4,
               decoration: const InputDecoration(
                 hintText: 'Jelaskan kondisi kerusakan...',
@@ -267,25 +354,20 @@ class _CreateReportPageState extends State<CreateReportPage> {
             SizedBox(
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Logic Kirim Data ke API
-                  if (_imageFile == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("Mohon ambil foto bukti kerusakan!"),
-                        backgroundColor: JalanKitaTheme.statusRejected));
-                  } else if (_currentPosition == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("Lokasi belum terdeteksi. Harap nyalakan GPS!"),
-                        backgroundColor: JalanKitaTheme.statusRejected));
-                  } else {
-                    // Logic kirim data...
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Mengirim Laporan...")),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.send_rounded),
-                label: const Text("KIRIM LAPORAN"),
+                onPressed: _isLoading
+                    ? null
+                    : _handleSubmit, // Disable saat loading
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.send_rounded),
+                label: Text(_isLoading ? "MENGIRIM..." : "KIRIM LAPORAN"),
               ),
             ),
           ],
