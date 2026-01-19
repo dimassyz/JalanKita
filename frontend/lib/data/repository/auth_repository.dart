@@ -33,6 +33,7 @@ class AuthRepository {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', authResponse.accessToken!);
       await prefs.setBool('is_login', true);
+      await prefs.setString('role', authResponse.data!.role ?? 'user');
 
       if (authResponse.data != null) {
         await prefs.setString('user_name', authResponse.data!.username ?? '');
