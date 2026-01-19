@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/presentation/pages/admin/admin_dashboard_page.dart';
 import 'package:frontend/presentation/pages/auth/login_page.dart';
 import 'package:frontend/presentation/pages/profile/profile_page.dart';
 import 'package:frontend/presentation/pages/report/create_report_page.dart';
 import 'package:frontend/presentation/pages/report/history_report_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:frontend/presentation/pages/admin/admin_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       // ),
       home: isLogin
           ? (role == 'admin'
-                ? const AdminPage()
+                ? const AdminDashboardPage()
                 : const MyHomePage(title: "JalanKita"))
           : const LoginPage(),
     );

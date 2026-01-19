@@ -34,7 +34,16 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Riwayat Laporan")),
+      appBar: AppBar(
+        title: const Text("Riwayat Laporan", style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadReports,
+            tooltip: 'Refresh',
+          ),
+        ],
+      ),
       body: FutureBuilder<List<Report>>(
         future: _reportFuture,
         builder: (context, snapshot) {
