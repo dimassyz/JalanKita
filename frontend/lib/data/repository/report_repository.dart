@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:frontend/data/usecase/request/create_report_request.dart';
+import 'package:frontend/data/usecase/response/get_all_report_response.dart';
 import 'package:frontend/data/usecase/response/my_report_response.dart';
 import 'package:frontend/data/service/http_service.dart';
 import 'dart:typed_data';
@@ -42,5 +43,10 @@ class ReportRepository {
     );
 
     return CreateReportResponse.fromJson(response.body);
+  }
+
+  Future<GetAllReportResponse> getAllReport() async {
+    final response = await httpService.get('admin/reports');
+    return GetAllReportResponse.fromJson(response.body);
   }
 }
