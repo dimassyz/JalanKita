@@ -48,7 +48,12 @@ class ReportRepository {
 
   Future<GetAllReportResponse> getAllReport() async {
     final response = await httpService.get('admin/reports');
-    return GetAllReportResponse.fromJson(response.body);
+
+    if (response.statusCode == 200) {
+      return GetAllReportResponse.fromJson(response.body);
+    } else {
+      throw Exception("Gagal memuat laporan admin: ${response.statusCode}");
+    }
   }
 
   Future<UpdateStatusResponse> updateReportStatus(
@@ -56,9 +61,13 @@ class ReportRepository {
     String newStatus,
   ) async {
     final response = await httpService.patch('admin/reports/$reportId/status', {
-      'status': newStatus,
+      'status': newStatus.toLowerCase(),
     });
 
-    return UpdateStatusResponse.fromJson(response.body);
+    if (response.statusCode == 200) {
+      return UpdateStatusResponse.fromJson(response.body);
+    } else {
+      throw Exception("Gagal mengubah status: ${response.body}");
+    }
   }
 }

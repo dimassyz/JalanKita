@@ -65,7 +65,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profil Saya", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Profil Saya",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           // Tombol Logout
           IconButton(
@@ -103,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               image: _user?.profilePicture != null
                                   ? DecorationImage(
                                       image: NetworkImage(
-                                        "http://10.112.163.140:2000/storage/${_user!.profilePicture}",
+                                        "http://192.168.1.6:8000/storage/${_user!.profilePicture}",
                                       ),
                                       fit: BoxFit.cover,
                                     )
