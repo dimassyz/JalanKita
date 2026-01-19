@@ -121,7 +121,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           : (widget.user?.profilePicture != null
                                 ? DecorationImage(
                                     image: NetworkImage(
-                                      "http://192.168.1.6:8000/storage/${widget.user!.profilePicture}",
+                                      "http://10.112.163.140:5000/storage/${widget.user!.profilePicture}",
                                     ),
                                     fit: BoxFit.cover,
                                   )

@@ -103,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               image: _user?.profilePicture != null
                                   ? DecorationImage(
                                       image: NetworkImage(
-                                        "http://192.168.1.6:8000/storage/${_user!.profilePicture}",
+                                        "http://10.112.163.140:5000/storage/${_user!.profilePicture}",
                                       ),
                                       fit: BoxFit.cover,
                                     )

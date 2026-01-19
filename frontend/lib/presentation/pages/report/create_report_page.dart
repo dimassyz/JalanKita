@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+
 class CreateReportPage extends StatefulWidget {
   final VoidCallback? onReportSubmitted;
 
@@ -19,6 +20,10 @@ class _CreateReportPageState extends State<CreateReportPage> {
   Position? _currentPosition; // Menyimpan koordinat (Latitude, Longitude)
   bool _isGettingLocation = false; // Indikator Loading GPS
   String _addressMessage = "Belum ada lokasi"; // Pesan status lokasi
+  
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  bool _isSubmitting = false;
 
   Future<void> _getImageFromCamera() async {
     try {
@@ -99,6 +104,13 @@ class _CreateReportPageState extends State<CreateReportPage> {
         _isGettingLocation = false; // Stop loading
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override

@@ -24,6 +24,8 @@ class AuthRepository {
   }
 
   Future<AuthResponse> login(LoginRequest request) async {
+    print('DEBUG: Mencoba login ke URL: endpoint login'); 
+    print('DEBUG: Data terkirim: ${request.toMap()}');
     final response = await httpService.post('login', request.toMap());
     final authResponse = AuthResponse.fromJson(response.body);
 
