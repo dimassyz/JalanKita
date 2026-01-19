@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app_theme.dart';
+import 'package:frontend/data/model/report.dart';
+import 'package:frontend/data/repository/report_repository.dart';
+import 'package:frontend/data/service/http_service.dart';
 import 'package:frontend/presentation/pages/auth/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -10,53 +14,222 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
-  // Filter Status Aktif
-  String _selectedFilter = 'All'; // All, Pending, Diproses, Selesai
+  String _selectedFilter = 'All';
+  List<Report> _reports = [];
+  bool _isLoading = true;
 
-  // Dummy Data Laporan (Campuran semua user)
-  final List<Map<String, dynamic>> allReports = [
-    {
-      "id": "1",
-      "user": "Budi Santoso",
-      "title": "Jalan Berlubang Parah",
-      "date": "15 Okt 2023",
-      "status": "Pending",
-      "location": "Jl. Mawar No. 10"
-    },
-    {
-      "id": "2",
-      "user": "Siti Aminah",
-      "title": "Lampu Merah Mati",
-      "date": "20 Okt 2023",
-      "status": "Diproses",
-      "location": "Simpang Lima"
-    },
-    {
-      "id": "3",
-      "user": "Ahmad Dani",
-      "title": "Pohon Tumbang",
-      "date": "21 Okt 2023",
-      "status": "Selesai",
-      "location": "Jl. Sudirman"
-    },
-    {
-      "id": "4",
-      "user": "User Iseng",
-      "title": "Tes Laporan",
-      "date": "22 Okt 2023",
-      "status": "Ditolak",
-      "location": "Rumah"
-    },
-  ];
-
-  // Helper untuk mendapatkan list yang difilter
-  List<Map<String, dynamic>> get filteredReports {
-    if (_selectedFilter == 'All') return allReports;
-    return allReports.where((r) => r['status'] == _selectedFilter).toList();
+  @override
+  void initState() {
+    super.initState();
+    _fetchReports();
   }
 
-  // Fungsi Update Status (Munculkan Modal)
-  void _showUpdateStatusDialog(Map<String, dynamic> report) {
+  Future<void> _fetchReports() async {
+    setState(() => _isLoading = true);
+    try {
+      final repo = ReportRepository(HttpService());
+      final response = await repo.getAllReport();
+      setState(() {
+        _reports = response.data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showSnackBar("Gagal mengambil data: $e");
+    }
+  }
+
+  void _updateStatus(int id, String newStatus) async {
+    Navigator.pop(context);
+    setState(() => _isLoading = true);
+
+    try {
+      final repo = ReportRepository(HttpService());
+      final response = await repo.updateReportStatus(
+        id,
+        newStatus.toLowerCase(),
+      );
+
+      if (response.status == "success") {
+        _showSnackBar("Status berhasil diubah menjadi $newStatus");
+        _fetchReports();
+      }
+    } catch (e) {
+      _showSnackBar("Gagal update: $e");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  List<Report> get filteredReports {
+    if (_selectedFilter == 'All') return _reports;
+    return _reports
+        .where((r) => r.status.toLowerCase() == _selectedFilter.toLowerCase())
+        .toList();
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Dashboard Admin",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.red),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              if (!mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                // 1. Statistik Ringkas
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      _buildStatCard(
+                        "Pending",
+                        _reports
+                            .where((r) => r.status == 'pending')
+                            .length
+                            .toString(),
+                        Colors.grey,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildStatCard(
+                        "Proses",
+                        _reports
+                            .where((r) => r.status == 'diproses')
+                            .length
+                            .toString(),
+                        Colors.blue,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildStatCard(
+                        "Selesai",
+                        _reports
+                            .where((r) => r.status == 'selesai')
+                            .length
+                            .toString(),
+                        Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 2. Filter Tabs
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      'All',
+                      'Pending',
+                      'Diproses',
+                      'Selesai',
+                      'Ditolak',
+                    ].map((e) => _buildFilterChip(e)).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // 3. List Laporan
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: _fetchReports,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredReports.length,
+                      itemBuilder: (context, index) {
+                        final report = filteredReports[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          color: JalanKitaTheme.surfaceColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[800],
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    "http://192.168.1.6:8000/storage/${report.imagePath}",
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              report.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "ID Laporan: #${report.id}",
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  report.status.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: _getStatusColor(report.status),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.edit_note,
+                                color: JalanKitaTheme.primaryColor,
+                              ),
+                              onPressed: () => _showUpdateStatusDialog(report),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  void _showUpdateStatusDialog(Report report) {
     showModalBottomSheet(
       context: context,
       backgroundColor: JalanKitaTheme.surfaceColor,
@@ -70,14 +243,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Update Status Laporan", 
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                "Update Status Laporan #${report.id}",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 20),
-              
-              // Pilihan Status
+
               _buildStatusOption(report, "Pending", Icons.timer, Colors.grey),
               _buildStatusOption(report, "Diproses", Icons.build, Colors.blue),
-              _buildStatusOption(report, "Selesai", Icons.check_circle, Colors.green),
+              _buildStatusOption(
+                report,
+                "Selesai",
+                Icons.check_circle,
+                Colors.green,
+              ),
               _buildStatusOption(report, "Ditolak", Icons.cancel, Colors.red),
             ],
           ),
@@ -86,155 +268,61 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
-  Widget _buildStatusOption(Map<String, dynamic> report, String status, IconData icon, Color color) {
+  Widget _buildStatusOption(
+    Report report,
+    String status,
+    IconData icon,
+    Color color,
+  ) {
     return ListTile(
       leading: Icon(icon, color: color),
-      title: Text(status, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
-      onTap: () {
-        // Update Logic (Dummy)
-        setState(() {
-          report['status'] = status;
-        });
-        Navigator.pop(context); // Tutup Modal
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Status diubah menjadi $status")),
-        );
-      },
-      trailing: report['status'] == status 
-          ? const Icon(Icons.check, color: Colors.white) 
+      title: Text(
+        status,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+      ),
+      onTap: () => _updateStatus(report.id, status), // Panggil Fungsi API
+      trailing: report.status.toLowerCase() == status.toLowerCase()
+          ? const Icon(Icons.check, color: Colors.white)
           : null,
     );
   }
 
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'selesai':
+        return Colors.green;
+      case 'diproses':
+        return Colors.blue;
+      case 'ditolak':
+        return Colors.red;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  // Widget StatCard tetap sama secara visual
   Widget _buildStatCard(String title, String count, Color color) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Column(
           children: [
-            Text(count, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-            const SizedBox(height: 4),
+            Text(
+              count,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
             Text(title, style: TextStyle(fontSize: 12, color: color)),
           ],
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard Admin", style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.red),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context, 
-                MaterialPageRoute(builder: (context) => const LoginPage())
-              );
-            },
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          // 1. Statistik Ringkas
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                _buildStatCard("Pending", "1", Colors.grey),
-                const SizedBox(width: 8),
-                _buildStatCard("Proses", "1", Colors.blue),
-                const SizedBox(width: 8),
-                _buildStatCard("Selesai", "1", Colors.green),
-              ],
-            ),
-          ),
-
-          // 2. Filter Tabs
-          SizedBox(
-            height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildFilterChip('All'),
-                _buildFilterChip('Pending'),
-                _buildFilterChip('Diproses'),
-                _buildFilterChip('Selesai'),
-                _buildFilterChip('Ditolak'),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 10),
-
-          // 3. List Laporan
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: filteredReports.length,
-              itemBuilder: (context, index) {
-                final report = filteredReports[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  color: JalanKitaTheme.surfaceColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(12),
-                    leading: Container(
-                      width: 50, height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.image, size: 20),
-                    ),
-                    title: Text(report['title'], 
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Pelapor: ${report['user']}", style: const TextStyle(fontSize: 12)),
-                        const SizedBox(height: 4),
-                        // Badge Status
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.white10,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            report['status'],
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: report['status'] == 'Selesai' ? Colors.green : 
-                                     report['status'] == 'Diproses' ? Colors.blue : 
-                                     report['status'] == 'Ditolak' ? Colors.red : Colors.grey
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit_note, color: JalanKitaTheme.primaryColor),
-                      onPressed: () => _showUpdateStatusDialog(report),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -246,18 +334,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       child: FilterChip(
         label: Text(label),
         selected: isSelected,
-        onSelected: (bool selected) {
-          setState(() {
-            _selectedFilter = label;
-          });
-        },
+        onSelected: (_) => setState(() => _selectedFilter = label),
         backgroundColor: JalanKitaTheme.inputColor,
         selectedColor: JalanKitaTheme.primaryColor,
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.black : Colors.white
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        side: BorderSide.none,
       ),
     );
   }

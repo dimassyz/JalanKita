@@ -98,7 +98,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Profil", style: TextStyle(fontWeight: FontWeight.bold),)),
+      appBar: AppBar(
+        title: const Text(
+          "Edit Profil",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -121,7 +126,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           : (widget.user?.profilePicture != null
                                 ? DecorationImage(
                                     image: NetworkImage(
-                                      "http://10.112.163.140:2000/storage/${widget.user!.profilePicture}",
+                                      "http://192.168.1.6:8000/storage/${widget.user!.profilePicture}",
                                     ),
                                     fit: BoxFit.cover,
                                   )
@@ -164,7 +169,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'Nama Lengkap',
-                prefixIcon: Icon(Icons.person_outline, color: JalanKitaTheme.primaryColor,),
+                prefixIcon: Icon(
+                  Icons.person_outline,
+                  color: JalanKitaTheme.primaryColor,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -175,7 +183,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
                 labelText: 'Nomor Telepon',
-                prefixIcon: Icon(Icons.phone_android, color: JalanKitaTheme.primaryColor,),
+                prefixIcon: Icon(
+                  Icons.phone_android,
+                  color: JalanKitaTheme.primaryColor,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -185,7 +196,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               controller: _alamatController,
               decoration: const InputDecoration(
                 labelText: 'Alamat Lengkap',
-                prefixIcon: Icon(Icons.home_outlined, color: JalanKitaTheme.primaryColor,),
+                prefixIcon: Icon(
+                  Icons.home_outlined,
+                  color: JalanKitaTheme.primaryColor,
+                ),
               ),
             ),
 

@@ -5,6 +5,7 @@ import 'package:frontend/data/repository/auth_repository.dart';
 import 'package:frontend/data/usecase/request/login_request.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/presentation/pages/auth/register_page.dart';
+import 'package:frontend/presentation/pages/admin/admin_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -44,10 +45,25 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response.message ?? "Login Berhasil!")),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MyHomePage(title: 'JalanKita',)),
-        );
+        final String role = response.data?.role ?? 'user';
+
+        if (!mounted) return;
+
+        if (role == 'admin') {
+          // Jika Admin, pindah ke Dashboard Admin
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+          );
+        } else {
+          // Jika User biasa, pindah ke MyHomePage (Warga)
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MyHomePage(title: 'JalanKita'),
+            ),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
