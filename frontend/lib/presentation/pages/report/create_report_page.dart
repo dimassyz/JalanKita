@@ -25,6 +25,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
   Position? _currentPosition; // Menyimpan koordinat (Latitude, Longitude)
   bool _isGettingLocation = false; // Indikator Loading GPS
+  bool _isLoading = false; // Indikator Loading Submit
   String _addressMessage = "Belum ada lokasi"; // Pesan status lokasi
 
   Future<void> _getImageFromCamera() async {
@@ -184,7 +185,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
+    _descController.dispose();
     super.dispose();
   }
 
