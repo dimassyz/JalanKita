@@ -4,13 +4,20 @@ import 'package:frontend/presentation/pages/auth/login_page.dart';
 import 'package:frontend/presentation/pages/profile/profile_page.dart';
 import 'package:frontend/presentation/pages/report/create_report_page.dart';
 import 'package:frontend/presentation/pages/report/history_report_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Cek Sesi Login
+  final prefs = await SharedPreferences.getInstance();
+  final bool isLogin = prefs.getBool('is_login') ?? false;
+
+  runApp(MyApp(isLogin: isLogin));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLogin;
+  const MyApp({super.key, required this.isLogin});
 
   // This widget is the root of your application.
   @override
@@ -21,7 +28,7 @@ class MyApp extends StatelessWidget {
       // theme: ThemeData(
       //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       // ),
-      home: LoginPage(),
+      home: isLogin ? const MyHomePage(title: "JalanKita") : const LoginPage(),
     );
   }
 }

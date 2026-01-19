@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:frontend/data/usecase/request/create_report_request.dart';
-import 'package:frontend/data/usecase/response/report_response.dart';
+import 'package:frontend/data/usecase/response/my_report_response.dart';
 import 'package:frontend/data/service/http_service.dart';
 import 'dart:typed_data';
+import 'package:frontend/data/usecase/response/create_report_response.dart';
 
 class ReportRepository {
   final HttpService httpService;
   ReportRepository(this.httpService);
 
-  Future<ReportResponse> getMyReport() async {
+  Future<MyReportResponse> getMyReport() async {
     final response = await httpService.get('my-reports');
-    return ReportResponse.fromJson(response.body);
+    return MyReportResponse.fromJson(response.body);
   }
 
   Future<Uint8List?> exportPdf(int reportId) async {
@@ -29,7 +30,7 @@ class ReportRepository {
     }
   }
 
-  Future<ReportResponse> createReport(
+  Future<CreateReportResponse> createReport(
     CreateReportRequest request,
     File imageFile,
   ) async {
@@ -40,6 +41,6 @@ class ReportRepository {
       'image',
     );
 
-    return ReportResponse.fromJson(response.body);
+    return CreateReportResponse.fromJson(response.body);
   }
 }
