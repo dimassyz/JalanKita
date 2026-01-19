@@ -1,5 +1,6 @@
 <?php
 
+use Dedoc\Scramble\Scramble;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

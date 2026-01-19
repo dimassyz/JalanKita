@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,8 +21,19 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
-    }
+
+
+public function boot(): void
+{
+    Scramble::afterOpenApiGenerated(function (OpenApi $openApi) {
+        $openApi->secure(
+            SecurityScheme::http('bearer')
+        );
+    });
+
+    Route::middleware('api')
+    ->prefix('api')
+    ->group(base_path('routes/api.php'));
 }
+}
+
